@@ -10,9 +10,9 @@ con = sqlite3.connect("tutorial.db")
 
 # init tables
 cur = con.cursor()
-cur.execute("CREATE TABLE USER(id, name, pwd)")
-cur.execute("CREATE TABLE PAYLOAD(id, user_id, name, value)")
-cur.execute("CREATE TABLE TOKENS(id, user_id, created_at)")
+cur.execute("CREATE TABLE IF NOT EXISTS USER(id, name, pwd)")
+cur.execute("CREATE TABLE IF NOT EXISTS PAYLOAD(id, user_id, name, value)")
+cur.execute("CREATE TABLE IF NOT EXISTS TOKENS(id, user_id, created_at)")
 
 
 # webapp
