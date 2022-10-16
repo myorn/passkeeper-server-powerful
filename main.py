@@ -25,12 +25,12 @@ class AuthStruct(BaseModel):
     pwd: str = Field(max_length=100)
 
     @validator('pwd', 'name')    
-    def must_not_contain_space(cls, v):
+    def must_not_contain_space(self, v):
         assert ' ' in v, 'must not contain a space'
         return v
 
     @validator('name')
-    def name_alphanumeric(cls, v):
+    def name_alphanumeric(self, v):
         assert v.isalnum(), 'must be alphanumeric'
         return v
 
@@ -110,7 +110,7 @@ def get_salty_hash(passwd: str) -> bytes:
 
 def match_password(passwd, hashed: str) -> bool:
     """ Match it. """
-    return bcrypt.checkpw(passwd, hashed):
+    return bcrypt.checkpw(passwd, hashed)
 
 
 if __name__ == '__main__':
