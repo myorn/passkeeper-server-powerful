@@ -19,8 +19,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install pipenv
         cd $(dirname $(git ls-files 'main.py'))
-        pipenv install
+        pipenv install --dev
     - name: Analysing the code with pylint
       run: |
+        cd $(dirname $(git ls-files 'main.py'))
+        cat Pipfile
         pipenv run pylint $(git ls-files '*.py')
 
