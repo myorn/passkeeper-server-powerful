@@ -24,5 +24,5 @@ jobs:
       run: |
         cd $(dirname $(git ls-files 'main.py'))
         cat Pipfile
-        pipenv run pylint --disable=C0103,E0611,R0903 $(git ls-files '*.py')
+        pipenv run pylint --disable=C0103 $(git ls-files '*.py')
 

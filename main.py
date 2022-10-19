@@ -1,11 +1,11 @@
 " Эта хуйня для того чтобы хранить пароли. Спасибо наздоровье "
 import sqlite3
+import gzip
+from io import StringIO
 # from uuid import uuid4
 from fastapi import Body, FastAPI, Query
-from pydantic import BaseModel, Field, validator
-from io import StringIO
+from pydantic import BaseModel, Field, validator # pylint: disable=E0611
 import bcrypt
-import gzip
 
 
 # db
@@ -38,7 +38,7 @@ class AuthStruct(BaseModel):
         return v
 
 
-class PushPayloadStruct(BaseModel):
+class PushPayloadStruct(BaseModel): # pylint: disable=R0903
     """ . """
     payload: str = Field(max_length=10000)
 
@@ -54,43 +54,37 @@ salt = bcrypt.gensalt()
 @app.post("/auth-me")
 async def auth_me(req: AuthStruct = Body(embed=True)):
     """ Auth user via login and pass. """
-    req = req
     # match pwd
 
     # create token
 
     # return token
-    return {"message": "хуй"}
+    return req
 
 
 @app.post("/get-payload/{name}")
 async def get_payload(name: str = Query(max_length=100, regex=r'^\S+$')):
     """ Get payload by name and auth token. """
-    name = name
-
     # check if auth token is valid
 
     # get payload by user_id and payload name
 
     # return a payload
-    return {"message": "хуй"}
+    return name
 
 
 @app.post("/push-payload/{name}")
 async def push_payload(
-        name: str = Query(max_length=100, regex=r'^\S+$'), 
+        name: str = Query(max_length=100, regex=r'^\S+$'),
         req: PushPayloadStruct = Body(embed=True)
         ):
     """ Push payload by name and auth token. """
-    name = name
-    req = req
-
     # check if auth token is valid
 
     # get payload by user_id and payload name
 
     # return ok
-    return
+    return {name, req}
 
 
 def compress_str(s: str) -> bytes:
@@ -107,7 +101,7 @@ def compress_str(s: str) -> bytes:
 def decompress_str(b: bytes) -> str:
     """ Decompress string. """
 
-    fobj = gzip.GzipFile(StringIO.StringIO(b))
+    fobj = gzip.GzipFile(StringIO(b))
     result = fobj.read()
     fobj.close()
 
@@ -126,4 +120,3 @@ def match_password(passwd, hashed: str) -> bool:
 
 if __name__ == '__main__':
     print('хуй')
-
