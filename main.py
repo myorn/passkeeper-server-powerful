@@ -62,7 +62,7 @@ async def auth_me(req: AuthStruct = Body(embed=True)):
     return req
 
 
-@app.post("/get-payload/{name}")
+@app.get("/get-payload/{name}")
 async def get_payload(name: str = Query(max_length=100, regex=r'^\S+$')):
     """ Get payload by name and auth token. """
     # check if auth token is valid
