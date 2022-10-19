@@ -1,5 +1,4 @@
 " Эта хуйня для того чтобы хранить пароли. Спасибо наздоровье "
-import sqlite3
 import gzip
 from io import StringIO
 # from uuid import uuid4
@@ -7,16 +6,10 @@ from fastapi import Body, FastAPI, Query
 from pydantic import BaseModel, Field, validator # pylint: disable=E0611
 import bcrypt
 
+from db import DBManager
 
-# db
-con = sqlite3.connect("main.db")
-
-
-# init tables
-cur = con.cursor()
-cur.execute("CREATE TABLE IF NOT EXISTS USER(id, name, pwd)")
-cur.execute("CREATE TABLE IF NOT EXISTS PAYLOAD(id, user_id, name, value)")
-cur.execute("CREATE TABLE IF NOT EXISTS TOKENS(id, user_id, created_at)")
+db = DBManager()
+db.init_tables()
 
 
 # validation structs
@@ -26,13 +19,13 @@ class AuthStruct(BaseModel):
     pwd: str = Field(max_length=100)
 
     @validator('pwd', 'name')
-    def must_not_contain_space(self, v):
+    def must_not_contain_space(cls, v):
         """ . """
         assert ' ' in v, 'must not contain a space'
         return v
 
     @validator('name')
-    def name_alphanumeric(self, v):
+    def name_alphanumeric(cls, v):
         """ . """
         assert v.isalnum(), 'must be alphanumeric'
         return v
@@ -119,4 +112,12 @@ def match_password(passwd, hashed: str) -> bool:
 
 
 if __name__ == '__main__':
+    # Will be moved in the tests later
+    # user = db.create_user("test", "test")
+    # print(user)
+    # payload = db.create_payload(user[0], "test", "test")
+    # print(payload)
+    # token = db.create_token(user[0])
+    # print(token)
+
     print('хуй')
