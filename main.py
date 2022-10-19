@@ -1,6 +1,6 @@
 " Эта хуйня для того чтобы хранить пароли. Спасибо наздоровье "
 import sqlite3
-from uuid import uuid4
+# from uuid import uuid4
 from fastapi import Body, FastAPI, Query
 from pydantic import BaseModel, Field, validator
 from io import StringIO
@@ -21,21 +21,25 @@ cur.execute("CREATE TABLE IF NOT EXISTS TOKENS(id, user_id, created_at)")
 
 # validation structs
 class AuthStruct(BaseModel):
+    """ . """
     name: str = Field(max_length=100)
     pwd: str = Field(max_length=100)
 
-    @validator('pwd', 'name')    
+    @validator('pwd', 'name')
     def must_not_contain_space(self, v):
+        """ . """
         assert ' ' in v, 'must not contain a space'
         return v
 
     @validator('name')
     def name_alphanumeric(self, v):
+        """ . """
         assert v.isalnum(), 'must be alphanumeric'
         return v
 
 
 class PushPayloadStruct(BaseModel):
+    """ . """
     payload: str = Field(max_length=10000)
 
 
@@ -50,6 +54,7 @@ salt = bcrypt.gensalt()
 @app.post("/auth-me")
 async def auth_me(req: AuthStruct = Body(embed=True)):
     """ Auth user via login and pass. """
+    req = req
     # match pwd
 
     # create token
@@ -59,8 +64,9 @@ async def auth_me(req: AuthStruct = Body(embed=True)):
 
 
 @app.post("/get-payload/{name}")
-async def get_payload(name: str = Query(max_length=100, regex='^\S+$')):
+async def get_payload(name: str = Query(max_length=100, regex=r'^\S+$')):
     """ Get payload by name and auth token. """
+    name = name
 
     # check if auth token is valid
 
@@ -71,8 +77,13 @@ async def get_payload(name: str = Query(max_length=100, regex='^\S+$')):
 
 
 @app.post("/push-payload/{name}")
-async def push_payload(name: str = Query(max_length=100, regex='^\S+$'), req: PushPayloadStruct = Body(embed=True)):
+async def push_payload(
+        name: str = Query(max_length=100, regex=r'^\S+$'), 
+        req: PushPayloadStruct = Body(embed=True)
+        ):
     """ Push payload by name and auth token. """
+    name = name
+    req = req
 
     # check if auth token is valid
 
@@ -86,9 +97,9 @@ def compress_str(s: str) -> bytes:
     """ Compress string. """
 
     out = StringIO()
-    f = gzip.GzipFile(fileobj=out, mode="w")
-    f.write(s)
-    f.close()
+    fobj  = gzip.GzipFile(fileobj=out, mode="w")
+    fobj .write(s)
+    fobj .close()
 
     return out.getvalue()
 
@@ -96,9 +107,9 @@ def compress_str(s: str) -> bytes:
 def decompress_str(b: bytes) -> str:
     """ Decompress string. """
 
-    f = gzip.GzipFile(StringIO.StringIO(text))
-    result = f.read()
-    f.close()
+    fobj = gzip.GzipFile(StringIO.StringIO(b))
+    result = fobj.read()
+    fobj.close()
 
     return result
 
