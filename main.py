@@ -1,7 +1,6 @@
 " Эта хуйня для того чтобы хранить пароли. Спасибо наздоровье "
 import gzip
 from io import StringIO
-# from uuid import uuid4
 from fastapi import Body, FastAPI, Query
 from pydantic import BaseModel, Field, validator # pylint: disable=E0611
 import bcrypt
@@ -9,7 +8,6 @@ import bcrypt
 from db import DBManager
 
 db = DBManager()
-db.init_tables()
 
 
 # validation structs
@@ -19,13 +17,13 @@ class AuthStruct(BaseModel):
     pwd: str = Field(max_length=100)
 
     @validator('pwd', 'name')
-    def must_not_contain_space(cls, v):
+    def must_not_contain_space(cls, v): # pylint: disable=E0213
         """ . """
         assert ' ' in v, 'must not contain a space'
         return v
 
     @validator('name')
-    def name_alphanumeric(cls, v):
+    def name_alphanumeric(cls, v): # pylint: disable=E0213
         """ . """
         assert v.isalnum(), 'must be alphanumeric'
         return v
@@ -84,9 +82,9 @@ def compress_str(s: str) -> bytes:
     """ Compress string. """
 
     out = StringIO()
-    fobj  = gzip.GzipFile(fileobj=out, mode="w")
-    fobj .write(s)
-    fobj .close()
+    fobj = gzip.GzipFile(fileobj=out, mode="w")
+    fobj.write(s)
+    fobj.close()
 
     return out.getvalue()
 
