@@ -1,7 +1,8 @@
 " Эта хуйня для того чтобы хранить пароли. Спасибо наздоровье "
 import gzip
+from datetime import datetime, timedelta
 from io import StringIO
-from fastapi import Body, FastAPI, Query
+from fastapi import Body, FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field, validator # pylint: disable=E0611
 import bcrypt
 
@@ -19,7 +20,7 @@ class AuthStruct(BaseModel):
     @validator('pwd', 'name')
     def must_not_contain_space(cls, v): # pylint: disable=E0213
         """ . """
-        assert ' ' in v, 'must not contain a space'
+        assert ' ' not in v, 'must not contain a space'
         return v
 
     @validator('name')
@@ -35,11 +36,37 @@ class PushPayloadStruct(BaseModel): # pylint: disable=R0903
 
 
 # webapp
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None)
 
 
 # get salt
 salt = bcrypt.gensalt()
+
+
+# store date here
+LAST_REGISTER = None
+
+
+@app.post("/YOUR/RANDOM/ENDPOINT/86c5ceb27e1bf441130299c0209e5f35b8"
+          "8089f62c06b2b09d65772274f12057/register") # change this!
+async def register(req: AuthStruct = Body(embed=True)):
+    """ Register user via login and pass. """
+    global LAST_REGISTER # pylint: disable=W0603
+
+    if LAST_REGISTER and LAST_REGISTER + timedelta(days=1) > datetime.now():
+        raise HTTPException(status_code=404)
+
+    LAST_REGISTER = datetime.now()
+
+    # TODO: check if username is not occupied
+
+    # insert user
+    user_id = db.create_user(req.name, get_salty_hash(req.pwd))[0]
+
+    # get token
+    token = db.create_token(user_id)[0]
+
+    return token
 
 
 @app.post("/auth-me")
@@ -101,12 +128,12 @@ def decompress_str(b: bytes) -> str:
 
 def get_salty_hash(passwd: str) -> bytes:
     """ Hash it. """
-    return bcrypt.hashpw(passwd, salt)
+    return bcrypt.hashpw(passwd.encode('utf8'), salt)
 
 
 def match_password(passwd, hashed: str) -> bool:
     """ Match it. """
-    return bcrypt.checkpw(passwd, hashed)
+    return bcrypt.checkpw(passwd.encode('utf8'), hashed)
 
 
 if __name__ == '__main__':
